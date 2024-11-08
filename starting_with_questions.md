@@ -15,7 +15,7 @@ SQL Queries:
 -- city and country names, ensuring accurate grouping.
 
 
- ‘‘‘ CREATE OR REPLACE VIEW level_of_transaction AS 
+ ``` CREATE OR REPLACE VIEW level_of_transaction AS 
 
     SELECT 
         TRIM(city) AS city,  -- Trim spaces from city names
@@ -38,7 +38,7 @@ SQL Queries:
 		
 
 
- ‘‘‘SELECT 
+ SELECT 
     modified_city,
     country,
     TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue, -- Format revenue for readability
@@ -49,7 +49,7 @@ GROUP BY
     modified_city,
     country
 ORDER BY 
-    city_revenue_ranked;-- Sort by revenue rank to display highest-ranking cities first ‘‘‘
+    city_revenue_ranked;-- Sort by revenue rank to display highest-ranking cities first```
 
 
 -- PART 2: Country-level Transaction Revenue
@@ -57,7 +57,7 @@ ORDER BY
 -- In this query, we rank countries by their total transaction revenue.
 -- Grouping by country allows us to compare revenue levels at a national level.
 
- ‘‘‘SELECT 
+ ```SELECT 
     
     country,
     TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue,-- Format revenue for readability
@@ -67,7 +67,7 @@ FROM
 GROUP BY
     country
 ORDER BY 
-    country_revenue_ranked;-- Sort by revenue rank to display highest-ranking countries first ‘‘‘
+    country_revenue_ranked;-- Sort by revenue rank to display highest-ranking countries first ```
 
 
 Answer:
@@ -83,7 +83,7 @@ Answer:
 
 
 SQL Queries:
- ‘‘‘WITH cleaned_sessions AS (
+ ```WITH cleaned_sessions AS (
     SELECT 
         CASE 
             WHEN ns.city IN ('(not set)', 'not available in demo dataset') OR ns.city IS NULL 
@@ -133,7 +133,7 @@ FROM
 GROUP BY 
     city, country -- Group by city and country to calculate the average per region
 ORDER BY 
-    avg_orders_per_visitor DESC; -- Order by the average number of orders per visitor in descending order ‘‘‘
+    avg_orders_per_visitor DESC; -- Order by the average number of orders per visitor in descending order ```
 
 
 
@@ -151,7 +151,7 @@ Answer:
 SQL Queries:
 -- 1) Top categories with highest revenue
 
-WITH cleaned_sessions AS (
+```WITH cleaned_sessions AS (
     SELECT 
         CASE 
             WHEN ns.country IN ('(not set)', 'not available in demo dataset') OR ns.country IS NULL 
@@ -211,7 +211,7 @@ WHERE
     country_category_rank = 1
 	
 ORDER BY 
-    total_revenue DESC;
+    total_revenue DESC;```
 
 
 
@@ -221,7 +221,7 @@ ORDER BY
 -- 2) top  categories with the highest total ordered sold in 2017 per city and country, where total ordered 
 -- is greater than 200
 
-WITH cleaned_sessions AS (
+```WITH cleaned_sessions AS (
     SELECT 
         TRIM(ns.country) AS country,
         TRIM(ns.city) AS city,
@@ -290,14 +290,14 @@ WHERE
 	AND total_ordered >200
 ORDER BY 
     category_rank,
-	total_ordered DESC;
+	total_ordered DESC;```
 
 
 
 -- 3) Analyzing the Relationship Between Order-to-Stock Ratio and Total Revenue by Product Category 
 -- Across Regions
 
-WITH cleaned_sessions AS (
+```WITH cleaned_sessions AS (
     SELECT 
         TRIM(ns.country) AS country,
         TRIM(ns.city) AS city,
@@ -347,7 +347,7 @@ FROM
 WHERE order_to_stock_ratio > (SELECT AVG(order_to_stock_ratio) FROM joined_sales) 
 ORDER BY 
     order_to_stock_ratio, 
-    total_revenue DESC;  
+    total_revenue DESC;```  
 	
 
 
@@ -369,7 +369,7 @@ Answer:
 
 SQL Queries:
 
-WITH product_details AS (
+```WITH product_details AS (
     SELECT 
         ns.productsku AS product_id,
         p.product_name AS product_name,
@@ -415,7 +415,7 @@ WHERE
     country_product_rank = 1 OR
 	city_product_rank  = 1
 ORDER BY
-   total_orders DESC;
+   total_orders DESC;```
 
 
 
@@ -423,7 +423,7 @@ ORDER BY
 
 
 
-WITH product_details AS (
+```WITH product_details AS (
     SELECT 
         ns.productsku AS product_id,
         ns.city AS city,
@@ -472,7 +472,7 @@ GROUP BY
     pd.country_product_rank,
     pd.city_product_rank
 ORDER BY
-    global_order_rank,global_revenue_rank DESC;
+    global_order_rank,global_revenue_rank DESC;```
 
 
 
@@ -504,7 +504,7 @@ SQL Queries:
 
 
 
-CREATE OR REPLACE VIEW region_product_revenue_view AS
+```CREATE OR REPLACE VIEW region_product_revenue_view AS
 WITH region_product_revenue AS (
     SELECT 
         ns.city AS city,
@@ -537,13 +537,13 @@ FROM
 
 GROUP BY
     pd.city,
-    pd.country
+    pd.country```
 
 
 
 -- Part A: Regional Revenue Contribution Analysis — Evaluating Each City's Impact on Total Global Revenue
 
-WITH revenue_totals AS (
+```WITH revenue_totals AS (
     SELECT 
         country,
         city,
@@ -569,13 +569,13 @@ FROM
     revenue_totals rt,
     total_global_revenue tgr
 ORDER BY 
-    revenue_percentage DESC;
+    revenue_percentage DESC;```
 
 
 
 
 -- Part B: Country-Level Revenue Contribution Analysis — Assessing Each Country's Share of Global Revenue
-WITH country_revenue AS (
+```WITH country_revenue AS (
     SELECT
         country,
         SUM(total_revenue) AS country_total_revenue
@@ -599,7 +599,7 @@ FROM
     country_revenue cr,
     global_revenue gr
 ORDER BY
-    country_global_impact_percentage DESC;
+    country_global_impact_percentage DESC;```
 
 
 
