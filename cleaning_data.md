@@ -14,7 +14,7 @@ What issues will you address by cleaning the data?
 
 
 Queries:
-##  SQL queries you used to clean the data.
+##  SQL queries used to clean the data.
 
 
 
