@@ -15,8 +15,7 @@ SQL Queries:
 -- city and country names, ensuring accurate grouping.
 
 
-
-CREATE OR REPLACE VIEW level_of_transaction AS 
+ ‘‘‘ CREATE OR REPLACE VIEW level_of_transaction AS 
 
     SELECT 
         TRIM(city) AS city,  -- Trim spaces from city names
@@ -50,7 +49,7 @@ GROUP BY
     modified_city,
     country
 ORDER BY 
-    city_revenue_ranked;-- Sort by revenue rank to display highest-ranking cities first
+    city_revenue_ranked;-- Sort by revenue rank to display highest-ranking cities first ‘‘‘
 
 
 -- PART 2: Country-level Transaction Revenue
