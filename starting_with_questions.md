@@ -38,7 +38,7 @@ SQL Queries:
 		
 
 
-SELECT 
+ ‘‘‘SELECT 
     modified_city,
     country,
     TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue, -- Format revenue for readability
@@ -57,7 +57,7 @@ ORDER BY
 -- In this query, we rank countries by their total transaction revenue.
 -- Grouping by country allows us to compare revenue levels at a national level.
 
-SELECT 
+ ‘‘‘SELECT 
     
     country,
     TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue,-- Format revenue for readability
@@ -67,7 +67,7 @@ FROM
 GROUP BY
     country
 ORDER BY 
-    country_revenue_ranked;-- Sort by revenue rank to display highest-ranking countries first
+    country_revenue_ranked;-- Sort by revenue rank to display highest-ranking countries first ‘‘‘
 
 
 Answer:
@@ -83,7 +83,7 @@ Answer:
 
 
 SQL Queries:
-WITH cleaned_sessions AS (
+ ‘‘‘WITH cleaned_sessions AS (
     SELECT 
         CASE 
             WHEN ns.city IN ('(not set)', 'not available in demo dataset') OR ns.city IS NULL 
@@ -133,7 +133,7 @@ FROM
 GROUP BY 
     city, country -- Group by city and country to calculate the average per region
 ORDER BY 
-    avg_orders_per_visitor DESC; -- Order by the average number of orders per visitor in descending order
+    avg_orders_per_visitor DESC; -- Order by the average number of orders per visitor in descending order ‘‘‘
 
 
 
