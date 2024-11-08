@@ -18,8 +18,9 @@ Queries:
 
 
 
-``` SELECT 
-        ns.productsku AS product_id,
+ 
+    ``` SELECT
+	ns.productsku AS product_id,
         p.product_name AS product_name,
         ns.city AS city,
         ns.country AS country,
