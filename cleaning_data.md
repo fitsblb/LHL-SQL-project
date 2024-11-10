@@ -1,5 +1,5 @@
-What issues will you address by cleaning the data?
-1. I identified several rows in the city and country columns of the new_sessions table that contained values such as '--', 'not set%', or '%not available in demo dataset'.
+# The issues I will address by cleaning the data?
+1. I identified several rows in the city and country columns of the new_sessions table that contained values such as empty string , 'not set', or 'not available in demo dataset'.
 2. To ensure accuracy throughout my analysis, I applied a filter condition and created a view that excludes these inconsistencies, allowing for more reliable results.
 3. I have also dropped some columns where the was no values/NULL in the rows.
    - The columns dropped are
@@ -19,7 +19,8 @@ Queries:
 
 
  
-    ``` SELECT
+``` 
+    SELECT
 	ns.productsku AS product_id,
         p.product_name AS product_name,
         ns.city AS city,
@@ -45,34 +46,41 @@ Queries:
         ns.productsku,
         p.product_name,
         ns.city,
-        ns.country```
+        ns.country;
+```
 
 
 
-```ALTER TABLE new_sessions
-DROP COLUMN searchkeyword;```
+```
+	ALTER TABLE new_sessions
+	DROP COLUMN searchkeyword;
+```
 
 
 
-```UPDATE new_sessions
-SET productsku = REPLACE(productsku, ' ', '')
-WHERE NOT productsku ~ '^[A-Za-z0-9]+$';--checks sku's with non alphanumerical characters```
+```
+	UPDATE new_sessions
+	SET productsku = REPLACE(productsku, ' ', '')
+	WHERE NOT productsku ~ '^[A-Za-z0-9]+$';--checks sku's with non alphanumerical characters
+```
 
 
 
 
 
-CASE
-           ``` WHEN TRIM(city) = 'New York' AND TRIM(country) = 'Canada' THEN 'New York'  -- Keep city as New York
+```
+	CASE
+            WHEN TRIM(city) = 'New York' AND TRIM(country) = 'Canada' THEN 'New York'  -- Keep city as New York
             WHEN TRIM(city) IN ('(not set)', 'not available in demo dataset') THEN 'City in ' || TRIM(country)
             ELSE TRIM(city)
         END AS modified_city,
         CASE
             WHEN TRIM(city) = 'New York' AND TRIM(country) = 'Canada' THEN 'United States'  -- Change country to United States
             ELSE TRIM(country)
-        END AS country,  -- Trim spaces from country names```
+        END AS country,  -- Trim spaces from country names
+```
 
-
+*These are some of the queries I used when cleaning the data, some of them are sliced to capture the logic behind my code. Full queries are in the 'starting_with_questions.md'*
 
 
 
