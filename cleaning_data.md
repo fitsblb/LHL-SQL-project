@@ -1,15 +1,15 @@
 What issues will you address by cleaning the data?
-1-
-## I identified several rows in the city and country columns of the new_sessions table that contained values such as '--', 'not set%', or '%not available in demo dataset'. To ensure accuracy throughout my analysis, I applied a filter condition and created a view that excludes these inconsistencies, allowing for more reliable results.
-
-2-
-## I have also dropped some columns where the was no values/NULL in the rows. The columns dropped are, searchkeyword,productrefundamount,  itemquantity, itemrevenue all of them are from new_sessions.
-
-3-
-## I have found three inconsistencies in productsku column in new_sessions where there was unwanted space in the sKu, so I trimmed out the space by replacing thee space with an empty string
-
-4-
-## In question number one, I have noticed the city of New York in correctly associated with Canada as country, so I corrected it to match it's respective country
+1. I identified several rows in the city and country columns of the new_sessions table that contained values such as '--', 'not set%', or '%not available in demo dataset'.
+2. To ensure accuracy throughout my analysis, I applied a filter condition and created a view that excludes these inconsistencies, allowing for more reliable results.
+3. I have also dropped some columns where the was no values/NULL in the rows.
+   - The columns dropped are
+      - searchkeyword
+      - productrefundamount
+      - itemquantity
+      - itemrevenue
+     - all of them are from new_sessions.
+4. I have found three inconsistencies in productsku column in new_sessions where there was unwanted space in the sKu, so I trimmed out the space by replacing thee space with an empty string
+5. In question number one, I have noticed the city of New York in correctly associated with Canada as country, so I corrected it to match it's respective country
 
 
 
