@@ -80,7 +80,7 @@ Queries:
         END AS country,  -- Trim spaces from country names
 ```
 
-*These are some of the queries I used when cleaning the data, some of them are sliced to capture the logic behind my code. Full queries are in the 'starting_with_questions.md'*
+*These are some of the queries I used when cleaning the data, some of them are sliced to capture the logic behind my code. Full queries are in the 'starting_with_questions.md' and starting_with_data.md'*
 
 
 
