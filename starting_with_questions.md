@@ -1,21 +1,20 @@
 Answer the following questions and provide the SQL queries used to find the answer.
 
     
-**Question 1: Which cities and countries have the highest level of transaction revenues on the site?**
+# 1. Which cities and countries have the highest level of transaction revenues on the site?
 
 
 SQL Queries:
 
--- PART 1
+*PART 1*
 
---The purpose of this query is to rank cities by their total transaction revenue.
--- Observed data issues, such as the city of New York incorrectly associated with Canada,
--- have been corrected in the view level_of_transaction. 
--- Additionally, TRIM functions are applied to remove any leading/trailing spaces in 
--- city and country names, ensuring accurate grouping.
+- The purpose of this query is to rank cities by their total transaction revenue.
+  - Observed data issues, such as the city of New York incorrectly associated with Canada, have been corrected in the view 'level_of_transaction'.
+  - Additionally, TRIM functions are applied to remove any leading/trailing spaces in city and country names, ensuring accurate grouping.
 
 
- ``` CREATE OR REPLACE VIEW level_of_transaction AS 
+ ```
+CREATE OR REPLACE VIEW level_of_transaction AS 
 
     SELECT 
         TRIM(city) AS city,  -- Trim spaces from city names
@@ -28,46 +27,46 @@ SQL Queries:
             WHEN TRIM(city) = 'New York' AND TRIM(country) = 'Canada' THEN 'United States'  -- Change country to United States
             ELSE TRIM(country)
         END AS country,  -- Trim spaces from country names
-        totaltransactionrevenue AS totalrevenue -- Maintain original revenue data without modifications		
+        totaltransactionrevenue AS totalrevenue -- Maintain original revenue data without modifications
     FROM 
         new_sessions
-    WHERE 
-        totaltransactionrevenue IS NOT NULL
-		AND country NOT IN ('(not set)', 'not available in demo dataset')
+    WHERE
+	totaltransactionrevenue IS NOT NULL
+	AND country NOT IN ('(not set)', 'not available in demo dataset')
 
 		
+   SELECT 
+    	modified_city,
+    	country,
+    	TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue, -- Format revenue for readability
+    	RANK() OVER (ORDER BY SUM(totalrevenue) DESC) AS city_revenue_ranked -- Rank cities by total revenue in descending order
+   FROM
+    	level_of_transaction
+   GROUP BY
+    	modified_city,
+    	country
+   ORDER BY 
+    	city_revenue_ranked;-- Sort by revenue rank to display highest-ranking cities first
+```
 
 
+*PART 2:*
+- Country-level Transaction Revenue
+  - In this query, we rank countries by their total transaction revenue.
+  - Grouping by country allows us to compare revenue levels at a national level.
+
+ ```
  SELECT 
-    modified_city,
-    country,
-    TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue, -- Format revenue for readability
-    RANK() OVER (ORDER BY SUM(totalrevenue) DESC) AS city_revenue_ranked -- Rank cities by total revenue in descending order
-FROM
-    level_of_transaction
-GROUP BY
-    modified_city,
-    country
-ORDER BY 
-    city_revenue_ranked;-- Sort by revenue rank to display highest-ranking cities first```
-
-
--- PART 2: Country-level Transaction Revenue
-
--- In this query, we rank countries by their total transaction revenue.
--- Grouping by country allows us to compare revenue levels at a national level.
-
- ```SELECT 
-    
-    country,
-    TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue,-- Format revenue for readability
-    RANK() OVER (ORDER BY SUM(totalrevenue) DESC) AS country_revenue_ranked -- Rank countries by total revenue in descending order
-FROM
-    level_of_transaction
-GROUP BY
-    country
-ORDER BY 
-    country_revenue_ranked;-- Sort by revenue rank to display highest-ranking countries first ```
+    	country,
+    	TO_CHAR(SUM(totalrevenue), '999,999,999,999') AS total_revenue,-- Format revenue for readability
+   	 RANK() OVER (ORDER BY SUM(totalrevenue) DESC) AS country_revenue_ranked -- Rank countries by total revenue in descending order
+ FROM
+    	level_of_transaction
+ GROUP BY
+    	country
+ ORDER BY 
+    	country_revenue_ranked;-- Sort by revenue rank to display highest-ranking countries first
+```
 
 
 Answer:
@@ -78,12 +77,15 @@ Answer:
 
 
 
-
-**Question 2: What is the average number of products ordered from visitors in each city and country?**
+# 2. What is the average number of products ordered from visitors in each city and country?
 
 
 SQL Queries:
- ```WITH cleaned_sessions AS (
+ ```
+/* Step 1: Do some data cleaning */
+
+
+WITH cleaned_sessions AS (
     SELECT 
         CASE 
             WHEN ns.city IN ('(not set)', 'not available in demo dataset') OR ns.city IS NULL 
@@ -105,35 +107,38 @@ SQL Queries:
         AND ns.city NOT LIKE 'not available in demo dataset' 
         AND ns.fullvisitorid IS NOT NULL 
         AND ns.country IS NOT NULL 
-)
+),
 
--- Step 2: Count products ordered by city and country, filtering out NULL cities
-, product_counts AS (
+/*Step 2: Count products ordered by city and country, filtering out NULL cities*/
+
+product_counts AS (
     SELECT 
-        city,
-        country,
-        COUNT(productsku) AS total_orders,-- Count the number of products ordered per visitor
-        fullvisitorid -- Associate the count with individual visitors for calculating average orders per visitor
+ 	city,
+ 	country,
+ 	COUNT(productsku) AS total_orders,-- Count the number of products ordered per visitor
+ 	fullvisitorid -- Associate the count with individual visitors for calculating average orders per visitor
     FROM 
-        cleaned_sessions
+ 	cleaned_sessions
     WHERE 
-        city IS NOT NULL
-		AND country IS NOT NULL-- Exclude unknown cities and countries from this count
+ 	city IS NOT NULL
+	AND country IS NOT NULL-- Exclude unknown cities and countries from this count
     GROUP BY 
-        city, country, fullvisitorid
+ 	city, country, fullvisitorid
 )
 
--- Step 3: Calculate average orders per visitor, by city and country
-SELECT 
-    city,
-    country,
-    ROUND(AVG(total_orders),2) AS avg_orders_per_visitor-- Calculate the average number of orders per visitor and round to 2 decimal places
-FROM 
-    product_counts
-GROUP BY 
-    city, country -- Group by city and country to calculate the average per region
-ORDER BY 
-    avg_orders_per_visitor DESC; -- Order by the average number of orders per visitor in descending order ```
+/*Step 3: Calculate average orders per visitor, by city and country*/
+
+     SELECT 
+ 	city,
+ 	country,
+ 	ROUND(AVG(total_orders),2) AS avg_orders_per_visitor-- Calculate the average number of orders per visitor and round to 2 decimal places
+     FROM 
+ 	product_counts
+     GROUP BY 
+ 	city, country -- Group by city and country to calculate the average per region
+     ORDER BY 
+ 	avg_orders_per_visitor DESC; -- Order by the average number of orders per visitor in descending order
+```
 
 
 
@@ -145,13 +150,14 @@ Answer:
 
 
 
-**Question 3: Is there any pattern in the types (product categories) of products ordered from visitors in each city and country?**
+# 3. Is there any pattern in the types (product categories) of products ordered from visitors in each city and country?
 
 
 SQL Queries:
--- 1) Top categories with highest revenue
+- **Sub-question 3.1:** Top categories with highest revenue  
 
-```WITH cleaned_sessions AS (
+```
+WITH cleaned_sessions AS (
     SELECT 
         CASE 
             WHEN ns.country IN ('(not set)', 'not available in demo dataset') OR ns.country IS NULL 
@@ -166,7 +172,7 @@ SQL Queries:
     WHERE 
         ns.v2productcategory NOT LIKE '%not set%'
         AND ns.country NOT LIKE '%not set%'
-		AND ns.city NOT IN ('(not set)', 'not available in demo dataset')
+	AND ns.city NOT IN ('(not set)', 'not available in demo dataset')
         AND ns.fullvisitorid IS NOT NULL 
         AND ns.country IS NOT NULL 
         AND ns.productprice > 0  -- Remove zero prices for accurate info
@@ -177,6 +183,7 @@ SQL Queries:
         ns.productprice
     ORDER BY 1
 ),
+
 joined_sales AS (
     SELECT 
         cs.country,
@@ -211,17 +218,17 @@ WHERE
     country_category_rank = 1
 	
 ORDER BY 
-    total_revenue DESC;```
+    total_revenue DESC;
+```
 
 
+![Screen Shot 2024-11-07 at 12 15 55 PM](https://github.com/user-attachments/assets/115c7ddf-624f-4426-b8fe-ec5d61fa4a16)
 
 
+- **Sub-question 3.2:**  top  categories with the highest total ordered sold in 2017 per city and country, where total ordered is greater than 200
 
-
--- 2) top  categories with the highest total ordered sold in 2017 per city and country, where total ordered 
--- is greater than 200
-
-```WITH cleaned_sessions AS (
+```
+WITH cleaned_sessions AS (
     SELECT 
         TRIM(ns.country) AS country,
         TRIM(ns.city) AS city,
@@ -247,6 +254,7 @@ ORDER BY
         ns.productprice,
         ns.transaction_date
 ),
+
 joined_sales AS (
     SELECT 
         cs.country,
@@ -262,42 +270,45 @@ joined_sales AS (
         cs.productid = sk.productsku
     WHERE 
         sk.total_ordered > 0  -- Exclude zero quantity orders
+
 ),
 region_ranked AS (
-SELECT 
-    country,
-    city,
-    productcategory,
-    total_ordered,
-    transaction_date,
-    DENSE_RANK() OVER (PARTITION BY country, city ORDER BY total_ordered DESC) AS category_rank
-FROM 
-    joined_sales
+   SELECT 
+    	country,
+    	city,
+    	productcategory,
+    	total_ordered,
+    	transaction_date,
+    	DENSE_RANK() OVER (PARTITION BY country, city ORDER BY total_ordered DESC) AS category_rank
+ FROM 
+    	joined_sales
 )
 
 SELECT 
 	country,
-    city,
-    productcategory,
-    total_ordered,
-    transaction_date
+    	city,
+    	productcategory,
+    	total_ordered,
+    	transaction_date
 
 FROM
 	region_ranked
 WHERE 
-    transaction_date >= '2017-01-01' AND transaction_date <= '2017-12-31'  -- Ensure it's within 2017
-    AND category_rank <= 5  -- Top 5 categories per city and country
+    	transaction_date >= '2017-01-01' AND transaction_date <= '2017-12-31'  -- Ensure it's within 2017
+    	AND category_rank <= 5  -- Top 5 categories per city and country
 	AND total_ordered >200
 ORDER BY 
-    category_rank,
-	total_ordered DESC;```
+    	category_rank,
+	total_ordered DESC;
+```
+
+![Screen Shot 2024-11-07 at 12 17 21 PM](https://github.com/user-attachments/assets/3248fa71-6e3f-4a92-b600-8d9dbe9f1a01)
 
 
+- **Sub-question 3.3:** Analyzing the Relationship Between Order-to-Stock Ratio and Total Revenue by Product Category Across Regions
 
--- 3) Analyzing the Relationship Between Order-to-Stock Ratio and Total Revenue by Product Category 
--- Across Regions
-
-```WITH cleaned_sessions AS (
+```
+WITH cleaned_sessions AS (
     SELECT 
         TRIM(ns.country) AS country,
         TRIM(ns.city) AS city,
@@ -347,37 +358,30 @@ FROM
 WHERE order_to_stock_ratio > (SELECT AVG(order_to_stock_ratio) FROM joined_sales) 
 ORDER BY 
     order_to_stock_ratio, 
-    total_revenue DESC;```  
+    total_revenue DESC;
+```  
 	
-
-
-
-Answer:
-
-![Screen Shot 2024-11-07 at 12 15 55 PM](https://github.com/user-attachments/assets/115c7ddf-624f-4426-b8fe-ec5d61fa4a16)
-
-
-![Screen Shot 2024-11-07 at 12 17 21 PM](https://github.com/user-attachments/assets/3248fa71-6e3f-4a92-b600-8d9dbe9f1a01)
 
 ![Screen Shot 2024-11-07 at 12 19 09 PM](https://github.com/user-attachments/assets/08c65d3f-eb35-4b08-a79e-d334aee471e7)
 
 
 
 
-**Question 4: What is the top-selling product from each city/country? Can we find any pattern worthy of noting in the products sold?**
+# 4. What is the top-selling product from each city/country? Can we find any pattern worthy of noting in the products sold?
 
 
 SQL Queries:
 
-```WITH product_details AS (
+```
+WITH product_details AS (
     SELECT 
         ns.productsku AS product_id,
         p.product_name AS product_name,
         ns.city AS city,
         ns.country AS country,
         COUNT(ns.productsku) AS total_orders,
-		RANK() OVER (PARTITION BY country ORDER BY COUNT(ns.productsku) DESC) AS country_product_rank,
-		RANK() OVER (PARTITION BY city ORDER BY COUNT(ns.productsku) DESC) AS city_product_rank,
+	RANK() OVER (PARTITION BY country ORDER BY COUNT(ns.productsku) DESC) AS country_product_rank,
+	RANK() OVER (PARTITION BY city ORDER BY COUNT(ns.productsku) DESC) AS city_product_rank,
     	DENSE_RANK() OVER (ORDER BY COUNT(ns.productsku) DESC) AS global_rank  -- Rank products globally by popularity
     FROM 
         new_sessions ns
@@ -415,15 +419,26 @@ WHERE
     country_product_rank = 1 OR
 	city_product_rank  = 1
 ORDER BY
-   total_orders DESC;```
+   total_orders DESC;
+```
+
+Answer:
+
+
+- We can observe how cities are ranked within their respective countries and how countries are ranked globally.
+- Additionally, we see that certain products, such as the 'Cam Indoor Security Camera - USA' and the 'Men's 100% Cotton Short Sleeve Hero Tee White,' are top performers.
+- These products not only rank #1 and #3 globally by total orders but also consistently rank as best-sellers within multiple cities and countries."
+
+
+
+  ![Screen Shot 2024-11-07 at 12 22 26 PM](https://github.com/user-attachments/assets/d6f2d1da-f8bf-418d-8af8-5375f46ff60c)
 
 
 
 
 
-
-
-```WITH product_details AS (
+```
+WITH product_details AS (
     SELECT 
         ns.productsku AS product_id,
         ns.city AS city,
@@ -455,7 +470,7 @@ SELECT
     pd.country_product_rank,
     pd.city_product_rank,
     SUM(pd.productprice * pd.total_orders) AS total_revenue,
-	DENSE_RANK() OVER (ORDER BY pd.total_orders DESC) AS global_order_rank,
+    DENSE_RANK() OVER (ORDER BY pd.total_orders DESC) AS global_order_rank,
     DENSE_RANK() OVER (ORDER BY SUM(pd.productprice * pd.total_orders) DESC) AS global_revenue_rank
 FROM
     product_details pd
@@ -472,39 +487,29 @@ GROUP BY
     pd.country_product_rank,
     pd.city_product_rank
 ORDER BY
-    global_order_rank,global_revenue_rank DESC;```
-
-
+    global_order_rank,global_revenue_rank DESC;
+```
 
 
 Answer:
-
--- "We can observe how cities are ranked within their respective countries and how countries are ranked 
--- globally. Additionally, we see that certain products, such as the 'Cam Indoor Security Camera - USA' 
--- and the 'Men's 100% Cotton Short Sleeve Hero Tee White,' are top performers. 
--- These products not only rank #1 and #3 globally by total orders but also consistently rank as 
--- best-sellers within multiple cities and countries."
-![Screen Shot 2024-11-07 at 12 22 26 PM](https://github.com/user-attachments/assets/d6f2d1da-f8bf-418d-8af8-5375f46ff60c)
+- I've observed a pattern where products such as the Cam Indoor Security Camera - USA in Mountain View and the Men's 100% Cotton Short Sleeve Hero Tee White in New York are not only top sellers in their respective cities but also major revenue generators globally."
 
 
-
-
--- "I've observed a pattern where products such as the Cam Indoor Security Camera - USA in Mountain View and the Men's 
--- 100% Cotton Short Sleeve Hero Tee White in New York are not only top sellers in their respective cities but also major
--- revenue generators globally."
 
 ![Screen Shot 2024-11-07 at 12 23 44 PM](https://github.com/user-attachments/assets/997fa96f-6048-4316-8986-667b7ef3bb8f)
 
 
 
-**Question 5: Can we summarize the impact of revenue generated from each city/country?**
+# 5. Can we summarize the impact of revenue generated from each city/country?
 
 SQL Queries:
--- Just to make things cleaner I have created a view called region_product_revenue
+- Just to make things cleaner I have created a view called region_product_revenue
 
 
 
-```CREATE OR REPLACE VIEW region_product_revenue_view AS
+```
+CREATE OR REPLACE VIEW region_product_revenue_view AS
+
 WITH region_product_revenue AS (
     SELECT 
         ns.city AS city,
@@ -537,13 +542,20 @@ FROM
 
 GROUP BY
     pd.city,
-    pd.country```
+    pd.country
+```
+
+- The purpose of the view is to do some Data cleaning and also aggregate product revenue based on region
 
 
 
--- Part A: Regional Revenue Contribution Analysis — Evaluating Each City's Impact on Total Global Revenue
+![Screen Shot 2024-11-07 at 12 27 06 PM](https://github.com/user-attachments/assets/0b03ba88-cae6-4f54-ab0e-90a6023810ab)
 
-```WITH revenue_totals AS (
+
+- PART 1 : Regional Revenue Contribution Analysis — Evaluating Each City's Impact on Total Global Revenue
+
+```
+WITH revenue_totals AS (
     SELECT 
         country,
         city,
@@ -569,13 +581,22 @@ FROM
     revenue_totals rt,
     total_global_revenue tgr
 ORDER BY 
-    revenue_percentage DESC;```
+    revenue_percentage DESC;
+```
+
+Answer:
+
+- More than half of our revenue was generated from the city of Mountain view in the USA
 
 
 
+  ![Screen Shot 2024-11-07 at 12 28 27 PM](https://github.com/user-attachments/assets/5dff6421-15e6-4e9b-9e63-3212605b0e8d)
 
--- Part B: Country-Level Revenue Contribution Analysis — Assessing Each Country's Share of Global Revenue
-```WITH country_revenue AS (
+
+
+- PART 2 : Country-Level Revenue Contribution Analysis — Assessing Each Country's Share of Global Revenue
+```
+WITH country_revenue AS (
     SELECT
         country,
         SUM(total_revenue) AS country_total_revenue
@@ -599,27 +620,20 @@ FROM
     country_revenue cr,
     global_revenue gr
 ORDER BY
-    country_global_impact_percentage DESC;```
-
-
+    country_global_impact_percentage DESC;
+```
 
 
 Answer:
 
-Just to make things cleaner I have created a view called region_product_revenue
-
-![Screen Shot 2024-11-07 at 12 27 06 PM](https://github.com/user-attachments/assets/0b03ba88-cae6-4f54-ab0e-90a6023810ab)
-
----More than half of our revenue was generated from the city of Mountain view in the USA
-![Screen Shot 2024-11-07 at 12 28 27 PM](https://github.com/user-attachments/assets/5dff6421-15e6-4e9b-9e63-3212605b0e8d)
-
-
 In Part B: Country-Level Revenue Contribution Analysis — Assessing Each Country's Share of Global Revenue we can see the USA leading with 91.75% of the total revenue
+
 ![Screen Shot 2024-11-07 at 12 29 38 PM](https://github.com/user-attachments/assets/f741e5bf-9b99-4fdc-aeba-dded913122e0)
 
 
 
--- Schema for the ecommerce Database
+# Schema for the ecommerce Database
+
 ![schema](https://github.com/user-attachments/assets/9f96e0e5-cef0-47df-8eea-badca7161817)
 
 
