@@ -1,7 +1,9 @@
 What are your risk areas? Identify and describe them.
 
 1. I have found many rows in city and country in the new_sessions table where the rows were either or city was 'not set%' or '%not available in demo dataset', so throughout my assignment I have adopted a filter condition and a view where I would filter them out to get concrete results
+
 - FOR EXAMPLE, this query effectively elliminates any occurences of inconsisten data on the where condition. It also checks and eliminitates any NULL values on the product price column.
+
       ```
           SELECT 
               ns.productsku AS product_id,
@@ -32,14 +34,15 @@ What are your risk areas? Identify and describe them.
             ns.country ```
 
   
-2. I have also dropped some columns where the was no values/NULL in the rows by doing this
+2. I have also dropped some columns where the was no values/NULL in the rows  in the new_session table.
+
 
    ```
      ALTER TABLE new_sessions
      DROP COLUMN searchkeyword;
     ```
 
--- The columns dropped are, searchkeyword,productrefundamount,  itemquantity, itemrevenue ALL from new_sessions
+- The columns dropped are, searchkeyword,productrefundamount,  itemquantity, itemrevenue ALL from new_sessions
 
 
 3. I have changed dataype of the date column in new_sessions which was in in integer intially to proper date format by altering the table's format
