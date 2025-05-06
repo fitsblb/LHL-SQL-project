@@ -1,4 +1,4 @@
-# Final-Project-Transforming-and-Analyzing-Data-with-SQL
+# Transforming-and-Analyzing-Data-with-SQL
 
 ## Project/Goals
 - In this project, I aimed to transform and analyze data from an ecommerce database to extract valuable insights regarding user behavior, product performance, and revenue generation across different regions.
